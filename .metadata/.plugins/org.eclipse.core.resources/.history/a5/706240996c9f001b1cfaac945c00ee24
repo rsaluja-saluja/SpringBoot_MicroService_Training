@@ -1,0 +1,5 @@
+package b35.banking.repo;
+
+public interface AccountRepository {
+
+}

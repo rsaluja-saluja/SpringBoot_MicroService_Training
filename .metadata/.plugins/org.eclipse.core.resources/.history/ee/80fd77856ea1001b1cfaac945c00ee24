@@ -1,0 +1,5 @@
+package com.jpa.mappings.entity;
+
+public class Book {
+
+}

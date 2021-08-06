@@ -1,0 +1,5 @@
+package b35.banking.dto;
+
+public class JointAccount {
+
+}

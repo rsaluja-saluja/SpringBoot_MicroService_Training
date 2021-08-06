@@ -1,0 +1,105 @@
+package b35.banking.controller;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import b35.banking.dto.Amount;
+import b35.banking.dto.FundTransfer;
+import b35.banking.dto.JointAccount;
+import b35.banking.entiry.Account;
+import b35.banking.entiry.Customer;
+import b35.banking.service.BankService;
+import b35.banking.utility.CustomErrorType;
+
+@RestController
+@RequestMapping("/bank")
+public class BankController {
+
+	@Autowired
+	BankService service;
+	
+	@PostMapping("/createaccount/{accType}")
+	public ResponseEntity<?> createNewAccount(@RequestBody Customer customer, @PathVariable String accType) {
+		System.out.println("createAccount Called");
+		System.out.println("Customer:" +customer.toString());
+		System.out.println("accType:" +accType);
+
+		ResponseEntity<?> response = new ResponseEntity<>(new CustomErrorType("Customer with accountType "+accType+" not created"),HttpStatus.CONFLICT);
+
+		Account acct = service.createAccount(customer, accType);
+		if(acct != null) {
+			response = ResponseEntity.ok(acct);
+		}
+		return response;
+	}
+	
+	@PostMapping("/createjointaccount")
+	public ResponseEntity<?> createJointAccount(@RequestBody JointAccount jointAccount) {
+		
+		ResponseEntity<?> response = new ResponseEntity<>(new CustomErrorType("Customers with accountType "+jointAccount.getAccType()+" not created"),HttpStatus.CONFLICT);
+
+		Account acct = service.createJointAccount(jointAccount.getCustomer1(), jointAccount.getCustomer2(), jointAccount.getAccType());
+		
+		if(acct != null) {
+			response = ResponseEntity.ok(acct);
+		}
+		return response;
+	}
+	
+	@GetMapping("/getAllCustomersOfAccount/{id}")
+	public ResponseEntity<?> getAllCustomerByAccId(@PathVariable int id) {
+		System.out.println("Get All Customers called with id"+id);
+		List<Customer> customers = service.getAllCustomersByAccId(id);
+		return ResponseEntity.ok(customers);
+	}
+	
+	@PutMapping("/editCustomer")
+	public ResponseEntity<?> editCustomer(@RequestBody Customer customer) {
+		
+		ResponseEntity<?> response = new ResponseEntity<>(new CustomErrorType("Customer with id "+customer.getId()+" doesn't exists"),HttpStatus.NOT_FOUND);
+		System.out.println("edit "+customer.toString());
+		Customer cust = service.editCustomerDetails(customer);
+		if(cust != null) {
+			response = ResponseEntity.ok(customer);
+		}
+		return response;
+	}
+	
+	@PutMapping("/addAmount/{accId}")
+	public ResponseEntity<?> addAmountToAccount(@PathVariable int accId, @RequestBody Amount amount) {
+		System.out.println("addAmount called: "+accId+" "+amount.getAmount());
+		ResponseEntity<?> response = new ResponseEntity<>(new CustomErrorType("Account with id "+accId+" doesn't exists"),HttpStatus.NOT_FOUND);
+		//System.out.println("edit "+customer.toString());
+		Account acc = service.addAmountToAccount(accId, amount.getAmount());
+		if(acc != null) {
+			response = ResponseEntity.ok(acc);
+		}
+		return response;
+	}
+	
+	@PostMapping("/transfer")
+	public ResponseEntity<?> doFundTransfer(@RequestBody FundTransfer fundTransfer) {
+		//ResponseEntity<?> response = new ResponseEntity<>(new CustomErrorType("Account with id "+fundTransfer.getFromAccountId()+" doesn't exists"),HttpStatus.NOT_FOUND);
+		StringBuilder str= new StringBuilder();
+		ResponseEntity<?> response; //= new ResponseEntity<>();//new CustomErrorType(str),HttpStatus.CONFLICT);
+		boolean status = service.fundTransfer(fundTransfer.getFromAccountId(), fundTransfer.getToAccountId(), fundTransfer.getAmount(),str);
+		System.out.println("status: "+status+" str="+str.toString());
+		if(status) 
+			response = new ResponseEntity<>(new CustomErrorType(str.toString()),HttpStatus.OK);
+		else 
+			response = new ResponseEntity<>(new CustomErrorType(str.toString()),HttpStatus.CONFLICT);
+		
+		return response;
+	}
+}

@@ -1,0 +1,12 @@
+package com.jpa.mappings.repo;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.jpa.mappings.entity.Book;
+
+@Repository
+public interface BookRepository extends JpaRepository<Book, Long>{
+
+	Book findByIsbn(String isbn);
+}

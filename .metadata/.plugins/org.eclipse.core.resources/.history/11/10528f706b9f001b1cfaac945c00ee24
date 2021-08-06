@@ -1,0 +1,9 @@
+package b35.banking.entiry;
+
+import javax.persistence.Entity;
+
+@Entity
+public class Account {
+
+	
+}

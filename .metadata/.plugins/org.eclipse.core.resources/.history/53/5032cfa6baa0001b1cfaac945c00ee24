@@ -1,0 +1,14 @@
+package b35.banking.dto;
+
+import org.springframework.beans.factory.annotation.Configurable;
+
+@Configurable
+
+public class FundTransfer {
+
+	int fromAccount;
+	int toAccount;
+	double amount;
+	
+	
+}

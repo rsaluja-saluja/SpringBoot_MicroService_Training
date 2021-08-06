@@ -1,0 +1,229 @@
+package b35.banking.service;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import b35.banking.entiry.Account;
+import b35.banking.entiry.Customer;
+import b35.banking.entiry.Name;
+import b35.banking.repo.AccountRepository;
+import b35.banking.repo.CustomerRepository;
+
+@SpringBootTest
+class BankServiceTest {
+	
+	@Autowired
+	BankService service;
+	
+	@Test
+	void testCreateAccount() {
+
+		Customer cust1 = new Customer(new Name("first1","mid1","last1"),"street1");
+		
+		Account acc1 = service.createAccount(cust1, "saving");
+		System.out.println(acc1.toString());
+		assertEquals(acc1.getBalance(), 0.0);
+		assertEquals(acc1.getAccountType(), "saving");
+		assertEquals(acc1.getId(), 1);
+		
+		Account acc2 = service.createAccount(cust1, "current");
+		System.out.println(acc2.toString());
+		assertEquals(acc2.getBalance(), 0.0);
+		assertEquals(acc2.getAccountType(), "current");
+		assertEquals(acc2.getId(), 2);
+		
+		assertEquals(service.getAllAccounts().size(), 2);
+		
+	}
+	
+	@Test
+	void testCreateAccountWithWrongAccType() {
+
+		Customer cust1 = new Customer(new Name("first1","mid1","last1"),"street1");
+		
+		Account acc1 = service.createAccount(cust1, "save");
+		
+		assertNull(acc1);
+		assertEquals(service.getAllAccounts().size(), 0);
+		
+	}
+
+	@Test
+	void testCreateJointAccount() {
+
+		Customer cust1 = new Customer(new Name("first1","mid1","last1"),"street1");
+		Customer cust2 = new Customer(new Name("first2","mid2","last2"),"street2");
+		
+		Account acc1 = service.createJointAccount(cust1, cust2, "joint");
+		System.out.println(acc1.toString());
+		
+		List<Customer> customers = service.getAllCustomers(acc1);
+		
+		System.out.println(customers.size());
+		System.out.println(customers.get(0).toString());
+		System.out.println(customers.get(1).toString());
+		
+		assertEquals(customers.size(), 2);
+		
+		List<Customer> customersList = service.getAllCustomersByAccId(acc1.getId());
+		System.out.println(customersList.size());
+		System.out.println(customersList.get(0).toString());
+		System.out.println(customersList.get(1).toString());
+		
+		assertEquals(customersList.size(), 2);
+		
+	}
+	
+	@Test
+	void testCreateJointAccountWithWrongAccType() {
+
+		Customer cust1 = new Customer(new Name("first1","mid1","last1"),"street1");
+		Customer cust2 = new Customer(new Name("first2","mid2","last2"),"street2");
+		
+		Account acc = service.createJointAccount(cust1, cust2, "saving");
+		assertNull(acc);
+	}
+	
+		
+	@Test
+	void testEditCustomerDetails() {
+		//Customer cust = new Customer(new Name("first1","mid1","last1"),"street1",null);
+		Customer cust = new Customer(new Name("first1","mid1","last1"),"street1");
+		Account acc = service.createAccount(cust, "saving");
+		
+		List<Customer> customers = service.getAllCustomersByAccId(acc.getId());
+		assertEquals(customers.size(), 1);
+		assertEquals(customers.get(0).getAddress(),"street1");
+		
+		Customer custChange = new Customer(customers.get(0).getId(),new Name("first1","mid1","last1"),"street2");
+		Customer cust1 = service.editCustomerDetails(custChange);
+		System.out.println("Changed "+cust1.toString());
+		
+		List<Customer> customersList = service.getAllCustomersByAccId(acc.getId());
+		assertEquals(customersList.size(), 1);
+		assertEquals(customersList.get(0).getAddress(),"street2");
+		
+	}
+
+	@Test
+	void testEditCustomerDetailsWhenCustomerNotExists() {
+		
+		Customer cust = new Customer("fi3856",new Name("first1","mid1","last1"),"street2");
+		Customer custChanged = service.editCustomerDetails(cust);
+		assertNull(custChanged);		
+	}
+	
+	@Test
+	void testGetAllCustomers() {
+		Customer cust1 = new Customer(new Name("first1","mid1","last1"),"street1");
+		Customer cust2 = new Customer(new Name("first2","mid2","last2"),"street2");
+		
+		Account acc1 = service.createJointAccount(cust1, cust2, "Joint");
+		System.out.println(acc1.toString());
+		
+		List<Customer> customers = service.getAllCustomers(acc1);
+		
+		System.out.println(customers.size());
+		System.out.println(customers.get(0).toString());
+		System.out.println(customers.get(1).toString());
+		
+		assertEquals(customers.size(), 2);	
+	}
+	
+	@Test
+	void testAddAmountToAccount() {
+		Customer cust1 = new Customer(new Name("first1","mid1","last1"),"street1");
+		
+		Account acc1 = service.createAccount(cust1, "saving");
+		System.out.println("Account:"+acc1.toString());
+		assertEquals(acc1.getBalance(), 0.0);
+		assertEquals(acc1.getAccountType(), "saving");
+		assertEquals(acc1.getId(), 1);
+		
+		Account acc = service.addAmountToAccount(acc1.getId(), 5000);
+		System.out.println("Account Changed:"+acc.toString());
+		assertEquals(acc.getBalance(), 5000);
+		
+		assertEquals(service.getAllAccounts().size(), 1);
+		assertEquals(service.getAllAccounts().get(0).getBalance(), 5000);
+	}
+
+	@Test
+	void testFundTransfer() {
+		//Create Account 1 with balance 5000 
+		Customer cust1 = new Customer(new Name("first1","mid1","last1"),"street1");		
+		Account acc1 = service.createAccount(cust1, "saving");
+		
+		acc1 = service.addAmountToAccount(acc1.getId(), 5000);
+		System.out.println("Account 1:"+acc1.toString());
+		assertEquals(acc1.getBalance(), 5000);
+		
+		//Create account 2 with balance of 1000
+		Customer cust2 = new Customer(new Name("first2","mid2","last2"),"street2");
+		Account acc2 = service.createAccount(cust2, "saving");
+		
+		acc2 = service.addAmountToAccount(acc2.getId(), 1000);
+		System.out.println("Account 2:"+acc2.toString());
+		assertEquals(acc2.getBalance(), 1000);
+		
+		assertEquals(service.getAllAccounts().size(), 2);
+		
+//		double amount = service.fundTransfer(acc1.getId(), acc2.getId(), 1000);
+//		assertEquals(amount, 2000);
+		
+		assertEquals(service.getAccountById(acc1.getId()).getBalance(), 4000);
+		assertEquals(service.getAccountById(acc2.getId()).getBalance(), 2000);
+		
+		System.out.println("Account 1 changed:"+service.getAccountById(acc1.getId()).toString());
+		System.out.println("Account 2: changed"+service.getAccountById(acc2.getId()).toString());
+					
+	}
+	
+	@Test
+	void testFundTransferWhenFromAccNotExists() {
+		
+		//Create account 2 with balance of 1000
+		Customer cust2 = new Customer(new Name("first2","mid2","last2"),"street2");
+		Account acc2 = service.createAccount(cust2, "saving");
+		acc2 = service.addAmountToAccount(acc2.getId(), 1000);
+		
+//		double amount = service.fundTransfer(3, acc2.getId(), 1000);
+//		assertEquals(amount, 0);
+	}
+	
+	@Test
+	void testFundTransferWhenToAccNotExists() {
+		
+		//Create account 2 with balance of 1000
+		Customer cust1 = new Customer(new Name("first1","mid1","last1"),"street1");		
+		Account acc1 = service.createAccount(cust1, "saving");		
+		acc1 = service.addAmountToAccount(acc1.getId(), 5000);
+		
+//		double amount = service.fundTransfer(acc1.getId(), 3, 1000);
+//		assertEquals(amount, 0);
+	}
+	
+	@Test
+	void testFundTransferWhenInsufficientBalance() {
+		
+		//Create Account 1 with balance 5000 
+		Customer cust1 = new Customer(new Name("first1","mid1","last1"),"street1");		
+		Account acc1 = service.createAccount(cust1, "saving");
+		acc1 = service.addAmountToAccount(acc1.getId(), 1000);
+				
+		//Create account 2 with balance of 1000
+		Customer cust2 = new Customer(new Name("first2","mid2","last2"),"street2");
+		Account acc2 = service.createAccount(cust2, "saving");
+		acc2 = service.addAmountToAccount(acc2.getId(), 1000);
+		
+		double amount = service.fundTransfer(acc1.getId(), acc2.getId(), 2000);
+		assertEquals(amount, 0);
+	}
+
+}

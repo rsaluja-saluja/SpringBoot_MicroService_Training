@@ -1,0 +1,40 @@
+package b35.banking.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import b35.banking.dto.FundTransfer;
+import b35.banking.entiry.Customer;
+import b35.banking.service.BankService;
+
+@RestController
+@RequestMapping("/bank")
+public class BankController {
+
+	@Autowired
+	BankService service;
+	
+	@PostMapping("/createaccount")
+	public ResponseEntity<?> createNewAccount(@RequestBody Customer customer) {
+		
+		return null;
+	}
+	
+	@PutMapping("/edit/{id}")
+	public ResponseEntity<?> editCustomer(@PathVariable int id, @RequestBody Customer customer) {
+		
+		return null;
+	}
+	
+	@PutMapping("/edit/{id}")
+	public ResponseEntity<?> doFundTransfer(@RequestBody FundTransfer	fundTransfer) {
+		
+		return null;
+	}
+}

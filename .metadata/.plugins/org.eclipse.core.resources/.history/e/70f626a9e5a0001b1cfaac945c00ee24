@@ -1,0 +1,48 @@
+package b35.banking.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import b35.banking.dto.FundTransfer;
+import b35.banking.entiry.Account;
+import b35.banking.entiry.Customer;
+import b35.banking.service.BankService;
+import b35.banking.utility.CustomErrorType;
+
+@RestController
+@RequestMapping("/bank")
+public class BankController {
+
+	@Autowired
+	BankService service;
+	
+	@PostMapping("/createaccount")
+	public ResponseEntity<?> createNewAccount(@RequestBody Customer customer, String accType) {
+		ResponseEntity<?> response = new ResponseEntity<>(new CustomErrorType("Customer with accountType "+accType+" not created"),HttpStatus.CONFLICT);
+
+		Account acct = service.createAccount(customer, accType);
+		if(acct != null) {
+			response = ResponseEntity.ok(acct);
+		}
+		return response;
+	}
+	
+	@PutMapping("/edit/{id}")
+	public ResponseEntity<?> editCustomer(@PathVariable int id, @RequestBody Customer customer) {
+		
+		return null;
+	}
+	
+	@PostMapping("/transfer")
+	public ResponseEntity<?> doFundTransfer(@RequestBody FundTransfer	fundTransfer) {
+		
+		return null;
+	}
+}

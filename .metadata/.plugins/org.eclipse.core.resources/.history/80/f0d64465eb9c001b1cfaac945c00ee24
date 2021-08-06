@@ -1,0 +1,5 @@
+package com.rest.client.entiry;
+
+public class Product {
+
+}

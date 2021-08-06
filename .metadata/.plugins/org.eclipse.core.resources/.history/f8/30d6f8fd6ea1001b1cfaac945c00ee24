@@ -1,0 +1,5 @@
+package com.jpa.mappings.repo;
+
+public class BookRepository {
+
+}

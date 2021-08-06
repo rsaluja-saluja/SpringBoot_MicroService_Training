@@ -1,0 +1,11 @@
+package b35.banking.dto;
+
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class Response {
+
+	FundTransfer ft;
+	double balance;
+}

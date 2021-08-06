@@ -1,0 +1,11 @@
+package b35.banking.entiry;
+
+import java.io.Serializable;
+
+import javax.persistence.Entity;
+
+@Entity
+public class Account implements Serializable{
+
+	
+}

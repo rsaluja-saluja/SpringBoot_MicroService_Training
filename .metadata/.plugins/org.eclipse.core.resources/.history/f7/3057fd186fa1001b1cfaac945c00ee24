@@ -1,0 +1,8 @@
+package com.jpa.mappings.repo;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public class BookRepository implements JpaRepository<Book, Long>{
+
+	Book findByIsbn(String isbn);
+}
